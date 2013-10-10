@@ -1,0 +1,43 @@
+#!/bin/bash
+# chkconfig: 2345 99 01
+
+# written for centos
+
+ADDRESS='test@test.com' # replace with your email
+CARBONC='test1@test.com test2@test.com' # replace with space separated list of emails to copy
+STARTSUBJ=`hostname`" started at "`date
+STOPSUBJ=`hostname`" stopped at "`date
+lockfile=/var/lock/subsys/emailstartstop
+
+start() {
+  echo -n $"Sending email on startup: "
+  
+  echo "EMO" | mailx -r fromemail@test.com -s "${STARTSUBJ}" ${ADDRESS} -c ${CARBONC} # replace with to email
+  $RETVAL=$?
+  echo
+  [ $RETVAL=0 ] && touch $lockfile
+  return 0
+}
+
+stop() {
+  echo -n $"Sending email on shutdown: "
+  
+  echo "EMO" | mailx -r fromemail@test.com -s "${STOPSUBJ}" ${ADDRESS} # replace with to email
+  $RETVAL=$?
+  echo
+  [ $RETVAL=0 ] && touch $lockfile
+  return 0
+}
+
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  *)
+    echo $"Usage: $prog {start|stop}"
+    exit 2
+esac
+exit ${RETVAL}
